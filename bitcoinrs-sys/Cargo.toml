@@ -1,0 +1,11 @@
+[package]
+name = "bitcoinrs-sys"
+version = "0.1.0"
+authors = ["AtsukiTak <takatomgoo@gmail.com>"]
+
+[dependencies]
+libc = "0.2"
+
+[build-dependencies]
+cc = "1.0"
+pkg-config = "0.3"
