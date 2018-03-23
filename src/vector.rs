@@ -93,15 +93,16 @@ impl<T: 'static> BtcVec<T> {
     }
 }
 
+/// Iterator 
 pub struct BtcVecIter<'a, T: 'static> {
     inner: &'a BtcVec<T>,
     n: usize,
 }
 
 impl<'a, T: 'static> Iterator for BtcVecIter<'a, T> {
-    type Item = &'a T;
+    type Item = &'static T;
 
-    fn next(&mut self) -> Option<&'a T> {
+    fn next(&mut self) -> Option<&'static T> {
         let n = self.n;
         if n < self.inner.len() {
             self.n = n + 1;
