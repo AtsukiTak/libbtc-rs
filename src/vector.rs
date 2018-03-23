@@ -7,7 +7,7 @@ use libbtc_sys::{btc_free, vector_add, vector_free, vector_new, Vector};
 type Should<T> = Option<T>;
 
 // Contained item must be created via `btc_malloc` or `btc_calloc`.
-extern "C" fn free_btc_item(raw: *mut c_void) {
+extern "C" fn free_vec_item(raw: *mut c_void) {
     unsafe { btc_free(raw) }
 }
 
@@ -20,7 +20,7 @@ pub struct BtcVec<T: 'static> {
 impl<T: 'static> BtcVec<T> {
     /// Construct new `BtcVec`.
     pub fn new() -> BtcVec<T> {
-        unsafe { BtcVec::from_inner_vec(vector_new(0, free_btc_item)) }
+        unsafe { BtcVec::from_inner_vec(vector_new(0, free_vec_item)) }
     }
 
     fn inner_ref(&self) -> &Vector {
@@ -30,6 +30,10 @@ impl<T: 'static> BtcVec<T> {
                 .as_ref() // Option<&Vector>
                 .unwrap() // &Vector
         }
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
     }
 
     /// Returns current number of items.
