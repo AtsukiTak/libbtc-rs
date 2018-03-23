@@ -3,7 +3,7 @@ extern crate libc;
 
 mod vector;
 
-use std::ffi::{CStr, CString};
+use std::ffi::CStr;
 
 use libc::c_char;
 

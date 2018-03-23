@@ -1,6 +1,6 @@
-extern crate bitcoinrs_sys;
-
 use std::marker::PhantomData;
+
+use libc::c_void;
 
 use bitcoinrs_sys::{vector_add, vector_new, Vector};
 
@@ -48,11 +48,11 @@ impl<T> BtcVec<T> {
         BtcVecIter { inner: self, n: 0 }
     }
 
-    // This cause allocation every time.
-    pub fn push(&mut self, item: Box<T>) {
+    /// Given `item` must be allocated via `btc_malloc` or `btc_calloc` function.
+    pub fn push(&mut self, item: *mut T) {
         self.use_inner_vec(|inner_vec| {
             unsafe {
-                if vector_add(inner_vec, Box::into_raw(item) as _) == 0 {
+                if vector_add(inner_vec, item as *mut c_void) == 0 {
                     panic!("Fail to push");
                 }
             }
