@@ -6,8 +6,9 @@ use bitcoinrs_sys::{vector_add, vector_new, Vector};
 
 type Should<T> = Option<T>;
 
+/// Abstract type for `libbtc::Vector`.
 pub struct BtcVec<T> {
-    vec: Should<*mut Vector>,
+    vec: Should<*mut Vector>, // This ptr's lifetime must be 'static.
     t: PhantomData<T>,
 }
 
@@ -60,6 +61,8 @@ impl<T> BtcVec<T> {
         });
     }
 
+    /// Useful function when you want to access raw `libbtc::Vector`.
+    /// You can use it for anything but you must return it inside closure.
     pub fn use_inner_vec<F, U>(&mut self, f: F) -> U
     where
         F: FnOnce(*mut Vector) -> (*mut Vector, U),
@@ -70,7 +73,13 @@ impl<T> BtcVec<T> {
         item
     }
 
-    pub fn from_inner_vec(vec: *mut Vector) -> BtcVec<T> {
+    /// Construct new `BtcVec`.
+    ///
+    /// # Unsafe
+    /// This function can't guarantee
+    /// - A lifetime of given `Vector` is `'static`.
+    /// - Type `T` is valid type for `Vector`.
+    pub unsafe fn from_inner_vec(vec: *mut Vector) -> BtcVec<T> {
         BtcVec {
             vec: Some(vec),
             t: PhantomData,
