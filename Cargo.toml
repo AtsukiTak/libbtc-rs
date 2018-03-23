@@ -1,8 +1,8 @@
 [package]
-name = "bitcoinrs"
+name = "libbtc-rs"
 version = "0.1.0"
 authors = ["AtsukiTak <takatomgoo@gmail.com>"]
 
 [dependencies]
-bitcoinrs-sys = { path = "bitcoinrs-sys" }
+libbtc-sys = { path = "libbtc-sys" }
 libc = "0.2"

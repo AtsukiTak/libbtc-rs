@@ -1,5 +1,5 @@
 [package]
-name = "bitcoinrs-sys"
+name = "libbtc-sys"
 version = "0.1.0"
 authors = ["AtsukiTak <takatomgoo@gmail.com>"]
 

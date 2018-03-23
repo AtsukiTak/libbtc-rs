@@ -1,4 +1,4 @@
-extern crate bitcoinrs_sys;
+extern crate libbtc_sys;
 extern crate libc;
 
 mod vector;
@@ -7,7 +7,7 @@ use std::ffi::CStr;
 
 use libc::c_char;
 
-use bitcoinrs_sys::btc_get_peers_from_dns;
+use libbtc_sys::btc_get_peers_from_dns;
 
 use self::vector::BtcVec;
 

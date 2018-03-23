@@ -1,0 +1,3 @@
+[submodule "libbtc-sys/libbtc"]
+	path = libbtc-sys/libbtc
+	url = https://github.com/libbtc/libbtc.git
