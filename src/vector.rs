@@ -2,7 +2,7 @@ use std::marker::PhantomData;
 
 use libc::c_void;
 
-use bitcoinrs_sys::{vector_add, vector_new, Vector};
+use bitcoinrs_sys::{btc_free, vector_add, vector_free, vector_new, Vector};
 
 type Should<T> = Option<T>;
 
@@ -13,11 +13,11 @@ pub struct BtcVec<T: 'static> {
 }
 
 impl<T: 'static> BtcVec<T> {
-
     /// Construct new `BtcVec`.
     pub fn new() -> BtcVec<T> {
-        let nothing_drop = |v| println!("Not drop {:?}", v);
-        unsafe { BtcVec::from_inner_vec(vector_new(0, nothing_drop)) }
+        // Contained item must be created via `btc_malloc` or `btc_calloc`.
+        let free = |raw| unsafe { btc_free(raw) };
+        unsafe { BtcVec::from_inner_vec(vector_new(0, free)) }
     }
 
     fn inner_ref(&self) -> &Vector {
@@ -93,7 +93,8 @@ impl<T: 'static> BtcVec<T> {
     }
 }
 
-/// Iterator 
+/// `Iterator` of `BtcVec`.
+/// Note that each iteration item has lifetime 'static.
 pub struct BtcVecIter<'a, T: 'static> {
     inner: &'a BtcVec<T>,
     n: usize,
@@ -110,5 +111,12 @@ impl<'a, T: 'static> Iterator for BtcVecIter<'a, T> {
         } else {
             None
         }
+    }
+}
+
+impl<T: 'static> Drop for BtcVec<T> {
+    fn drop(&mut self) {
+        let inner_vec = self.vec.take().unwrap();
+        unsafe { vector_free(inner_vec, true as u8) };
     }
 }
