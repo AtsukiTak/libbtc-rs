@@ -54,6 +54,12 @@ pub enum NODE_STATE {
 
 #[link(name = "btc", kind = "static")]
 extern "C" {
+    pub fn btc_malloc(size: size_t) -> *mut c_void;
+    pub fn btc_calloc(count: size_t, size: size_t) -> *mut c_void;
+    pub fn btc_realloc(ptr: *mut c_void, size: size_t) -> *mut c_void;
+    pub fn btc_free(ptr: *mut c_void);
+
+
     pub fn vector_new(res: size_t, free_f: fn(*mut c_void)) -> *mut Vector;
     pub fn vector_free(vec: *mut Vector, free_array: btc_bool);
     pub fn vector_add(vec: *mut Vector, data: *mut c_void) -> btc_bool;
