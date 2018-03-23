@@ -6,6 +6,11 @@ use libbtc_sys::{btc_free, vector_add, vector_free, vector_new, Vector};
 
 type Should<T> = Option<T>;
 
+// Contained item must be created via `btc_malloc` or `btc_calloc`.
+extern "C" fn free_btc_item(raw: *mut c_void) {
+    unsafe { btc_free(raw) }
+}
+
 /// Abstract type for `libbtc::Vector`.
 pub struct BtcVec<T: 'static> {
     vec: Should<*mut Vector>, // This ptr's lifetime must be 'static.
@@ -15,9 +20,7 @@ pub struct BtcVec<T: 'static> {
 impl<T: 'static> BtcVec<T> {
     /// Construct new `BtcVec`.
     pub fn new() -> BtcVec<T> {
-        // Contained item must be created via `btc_malloc` or `btc_calloc`.
-        let free = |raw| unsafe { btc_free(raw) };
-        unsafe { BtcVec::from_inner_vec(vector_new(0, free)) }
+        unsafe { BtcVec::from_inner_vec(vector_new(0, free_btc_item)) }
     }
 
     fn inner_ref(&self) -> &Vector {
