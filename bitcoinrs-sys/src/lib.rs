@@ -38,32 +38,20 @@ pub struct Vector {
     elem_free_f: fn(*mut c_void),
 }
 
-#[repr(C)]
-#[derive(Debug, Clone, Copy)]
-pub enum NODE_STATE {
-    NODE_CONNECTING = (1 << 0),
-    NODE_CONNECTED = (1 << 1),
-    NODE_ERRORED = (1 << 2),
-    NODE_TIMEOUT = (1 << 3),
-    NODE_HEADERSYNC = (1 << 4),
-    NODE_BLOCKSYNC = (1 << 5),
-    NODE_MISSBEHAVED = (1 << 6),
-    NODE_DISCONNECTED = (1 << 7),
-    NODE_DISCONNECTED_FROM_REMOTE_PEER = (1 << 8),
-}
-
 #[link(name = "btc", kind = "static")]
 extern "C" {
+    /* Bindings of memory.h */
     pub fn btc_malloc(size: size_t) -> *mut c_void;
     pub fn btc_calloc(count: size_t, size: size_t) -> *mut c_void;
     pub fn btc_realloc(ptr: *mut c_void, size: size_t) -> *mut c_void;
     pub fn btc_free(ptr: *mut c_void);
 
-
+    /* Bindings of vector.h */
     pub fn vector_new(res: size_t, free_f: fn(*mut c_void)) -> *mut Vector;
     pub fn vector_free(vec: *mut Vector, free_array: btc_bool);
     pub fn vector_add(vec: *mut Vector, data: *mut c_void) -> btc_bool;
 
+    /* Bindings of net.h */
     pub fn btc_get_peers_from_dns(
         seed: *const c_char,
         ips_out: *mut Vector,
