@@ -24,21 +24,19 @@ extern "C" {
 mod tests {
     use super::*;
 
+    extern "C" fn nothing(_v: *mut c_void) {
+        ()
+    }
+
     #[test]
     fn vector() {
         unsafe {
-            let vec = vector_new(10, |_v| ());
+            let vec = vector_new(10, nothing);
             let answer: *mut usize = &mut 42;
-            let data = ::std::mem::transmute::<*mut usize, *mut c_void>(answer);
-            assert!(vector_add(vec, data) == 1);
+            assert!(vector_add(vec, answer as *mut _) == 1);
 
-            let raw_data = vec.as_ref().unwrap().data.as_ref().unwrap()[0];
-            assert_eq!(
-                ::std::mem::transmute::<*mut c_void, *mut usize>(raw_data)
-                    .as_ref()
-                    .unwrap(),
-                &42
-            );
+            let raw_data = (*vec.as_ref().unwrap().data.as_ref().unwrap()) as *mut usize;
+            assert_eq!(raw_data.as_ref().unwrap(), &42);
         };
     }
 }
