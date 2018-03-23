@@ -7,12 +7,14 @@ use bitcoinrs_sys::{vector_add, vector_new, Vector};
 type Should<T> = Option<T>;
 
 /// Abstract type for `libbtc::Vector`.
-pub struct BtcVec<T> {
+pub struct BtcVec<T: 'static> {
     vec: Should<*mut Vector>, // This ptr's lifetime must be 'static.
     t: PhantomData<T>,
 }
 
-impl<T> BtcVec<T> {
+impl<T: 'static> BtcVec<T> {
+
+    /// Construct new `BtcVec`.
     pub fn new() -> BtcVec<T> {
         let nothing_drop = |v| println!("Not drop {:?}", v);
         unsafe { BtcVec::from_inner_vec(vector_new(0, nothing_drop)) }
@@ -27,11 +29,15 @@ impl<T> BtcVec<T> {
         }
     }
 
+    /// Returns current number of items.
     pub fn len(&self) -> usize {
         self.inner_ref().len
     }
 
-    pub fn index(&self, idx: usize) -> &T {
+    /// Returns reference to internal item.
+    /// Note that since all internal items are allocated onto heap memory,
+    /// returned item's lifetime is 'static.
+    pub fn index(&self, idx: usize) -> &'static T {
         if idx < self.len() {
             unsafe {
                 let &raw = self.inner_ref().data // *mut *mut c_void
@@ -87,12 +93,12 @@ impl<T> BtcVec<T> {
     }
 }
 
-pub struct BtcVecIter<'a, T: 'a> {
+pub struct BtcVecIter<'a, T: 'static> {
     inner: &'a BtcVec<T>,
     n: usize,
 }
 
-impl<'a, T: 'a> Iterator for BtcVecIter<'a, T> {
+impl<'a, T: 'static> Iterator for BtcVecIter<'a, T> {
     type Item = &'a T;
 
     fn next(&mut self) -> Option<&'a T> {
