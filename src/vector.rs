@@ -2,7 +2,8 @@ use std::marker::PhantomData;
 
 use libc::c_void;
 
-use libbtc_sys::{btc_free, vector_add, vector_free, vector_new, Vector};
+use libbtc_sys::btc_free;
+use libbtc_sys::vector::{vector_add, vector_free, vector_new, Vector};
 
 type Should<T> = Option<T>;
 

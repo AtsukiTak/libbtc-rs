@@ -1,6 +1,7 @@
-use libc::{c_char, c_int, c_uchar, c_void, size_t, uint32_t, uint8_t};
+use libc::{c_char, c_int, c_uchar, uint32_t, uint8_t};
 
-use {Vector, uint256};
+use uint256;
+use vector::Vector;
 
 #[repr(C)]
 #[derive(Clone, Copy)]
