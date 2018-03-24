@@ -7,14 +7,9 @@ use libbtc_sys::vector::{vector_add, vector_free, vector_new, Vector};
 
 type Should<T> = Option<T>;
 
-// Contained item must be created via `btc_malloc` or `btc_calloc`.
-extern "C" fn free_vec_item(raw: *mut c_void) {
-    unsafe { btc_free(raw) }
-}
-
 /// Abstract type for `libbtc::Vector`.
 pub struct BtcVec<T: 'static> {
-    vec: Should<*mut Vector>, // This ptr's lifetime must be 'static.
+    inner: Should<*mut Vector>, // This ptr's lifetime must be 'static.
     t: PhantomData<T>,
 }
 
@@ -26,7 +21,7 @@ impl<T: 'static> BtcVec<T> {
 
     fn inner_ref(&self) -> &Vector {
         unsafe {
-            self.vec.as_ref() // Option<&*mut Vector>
+            self.inner.as_ref() // Option<&*mut Vector>
                 .unwrap() // &*mut Vector
                 .as_ref() // Option<&Vector>
                 .unwrap() // &Vector
@@ -64,7 +59,10 @@ impl<T: 'static> BtcVec<T> {
     }
 
     /// Given `item` must be allocated via `btc_malloc` or `btc_calloc` function.
-    pub fn push(&mut self, item: *mut T) {
+    ///
+    /// # Unsafe
+    /// It is unsafe when `item` is not created using `btc_malloc` or `btc_calloc`.
+    pub unsafe fn push(&mut self, item: *mut T) {
         self.use_inner_vec(|inner_vec| {
             unsafe {
                 if vector_add(inner_vec, item as *mut c_void) == 0 {
@@ -81,9 +79,9 @@ impl<T: 'static> BtcVec<T> {
     where
         F: FnOnce(*mut Vector) -> (*mut Vector, U),
     {
-        let inner_vec = self.vec.take().unwrap();
+        let inner_vec = self.inner.take().unwrap();
         let (inner_vec, item) = f(inner_vec);
-        self.vec = Some(inner_vec);
+        self.inner = Some(inner_vec);
         item
     }
 
@@ -93,12 +91,17 @@ impl<T: 'static> BtcVec<T> {
     /// This function can't guarantee
     /// - A lifetime of given `Vector` is `'static`.
     /// - Type `T` is valid type for `Vector`.
-    pub unsafe fn from_inner_vec(vec: *mut Vector) -> BtcVec<T> {
+    pub unsafe fn from_inner_vec(inner: *mut Vector) -> BtcVec<T> {
         BtcVec {
-            vec: Some(vec),
+            inner: Some(inner),
             t: PhantomData,
         }
     }
+}
+
+// Contained item must be created via `btc_malloc` or `btc_calloc`.
+extern "C" fn free_vec_item(raw: *mut c_void) {
+    unsafe { btc_free(raw) }
 }
 
 /// `Iterator` of `BtcVec`.
@@ -124,7 +127,7 @@ impl<'a, T: 'static> Iterator for BtcVecIter<'a, T> {
 
 impl<T: 'static> Drop for BtcVec<T> {
     fn drop(&mut self) {
-        let inner_vec = self.vec.take().unwrap();
+        let inner_vec = self.inner.take().unwrap();
         unsafe { vector_free(inner_vec, true as u8) };
     }
 }
