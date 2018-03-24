@@ -1,3 +1,6 @@
+#![allow(non_snake_case)]
+#![allow(dead_code)]
+
 use libc::{c_char, c_int, c_uchar, c_uint, c_void, sockaddr, uint32_t, uint64_t, uint8_t};
 
 use {btc_bool, uint256};
@@ -63,7 +66,6 @@ pub struct BtcNode {
     time_last_request: uint64_t,
     last_requested_inv: uint256,
 
-    #[allow(non_snake_case)]
     recvBuffer: *mut cstring,
     nonce: uint64_t,
     services: uint64_t,
