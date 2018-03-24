@@ -54,6 +54,8 @@ impl<T: 'static> BtcVec<T> {
         }
     }
 
+    /// Create a new iterator.
+    /// `BtcVecIter` iterates allocated pointer to `T`.
     pub fn iter(&self) -> BtcVecIter<T> {
         BtcVecIter { inner: self, n: 0 }
     }
