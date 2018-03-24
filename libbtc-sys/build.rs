@@ -16,6 +16,7 @@ fn main() {
         .file("libbtc/src/net.c")
         .file("libbtc/src/vector.c")
         .file("libbtc/src/memory.c")
+        .file("libbtc/src/chainparams.c")
         .file("libbtc/src/cstr.c")
         .compile("libbtc.a")
 }

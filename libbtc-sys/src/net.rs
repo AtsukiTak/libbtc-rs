@@ -32,6 +32,7 @@ pub enum EventBase {}
 pub enum BtcP2PMsgHdr {}
 pub enum cstring {} // Should implement later.
 
+#[repr(C)]
 pub struct BtcNodeGroup {
     ctx: *mut c_void, /* flexible context usefull in conjunction with the callbacks */
     event_base: *mut EventBase,
@@ -62,6 +63,7 @@ pub struct BtcNode {
     time_last_request: uint64_t,
     last_requested_inv: uint256,
 
+    #[allow(non_snake_case)]
     recvBuffer: *mut cstring,
     nonce: uint64_t,
     services: uint64_t,
@@ -77,7 +79,15 @@ pub struct BtcNode {
 #[link(name = "btc", kind = "static")]
 extern "C" {
     /* ======================================= */
-    /* NODES                                   */
+    /* CHAIN PARAMS */
+    /* ======================================= */
+
+    static btc_chainparams_main: BtcChainParams;
+    static btc_chainparams_test: BtcChainParams;
+    static btc_chainparams_regtest: BtcChainParams;
+
+    /* ======================================= */
+    /* NODES */
     /* ======================================= */
 
     pub fn btc_node_new() -> *mut BtcNode;
@@ -87,7 +97,7 @@ extern "C" {
     pub fn btc_node_set_ipport(node: *mut BtcNode, ipport: *const c_char) -> btc_bool;
 
     /* ======================================= */
-    /* NODE GROUPS                             */
+    /* NODE GROUPS */
     /* ======================================= */
 
     pub fn btc_node_group_new(params: *const BtcChainParams) -> *mut BtcNodeGroup;
@@ -111,6 +121,15 @@ mod tests {
             let node = btc_node_new();
             assert!(!node.is_null());
             btc_node_free(node);
+        }
+    }
+
+    #[test]
+    fn btc_node_group_new_and_free_should_not_panic() {
+        unsafe {
+            let group = btc_node_group_new(&btc_chainparams_main);
+            assert!(!group.is_null());
+            btc_node_group_free(group);
         }
     }
 }
