@@ -81,7 +81,7 @@ extern "C" {
     /* ======================================= */
 
     pub fn btc_node_new() -> *mut BtcNode;
-    pub fn btc_node_free(group: *mut BtcNode);
+    pub fn btc_node_free(node: *mut BtcNode);
 
     /* set the nodes ip address and port (ipv4 or ipv6)*/
     pub fn btc_node_set_ipport(node: *mut BtcNode, ipport: *const c_char) -> btc_bool;
@@ -90,8 +90,8 @@ extern "C" {
     /* NODE GROUPS                             */
     /* ======================================= */
 
-    pub fn btc_node_group_new(*const BtcChainParams) -> *mut BtcNodeGroup;
-    pub fn btc_node_group_free(*mut BtcNodeGroup);
+    pub fn btc_node_group_new(params: *const BtcChainParams) -> *mut BtcNodeGroup;
+    pub fn btc_node_group_free(group: *mut BtcNodeGroup);
 
     pub fn btc_get_peers_from_dns(
         seed: *const c_char,
