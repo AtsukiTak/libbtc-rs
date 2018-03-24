@@ -9,7 +9,7 @@ type Should<T> = Option<T>;
 
 /// Abstract type for `libbtc::Vector`.
 pub struct BtcVec<T: 'static> {
-    inner: Should<*mut Vector>, // This ptr's lifetime must be 'static.
+    inner: Should<*mut Vector>, // This ptr's lifetime is 'static.
     t: PhantomData<T>,
 }
 
@@ -19,7 +19,7 @@ impl<T: 'static> BtcVec<T> {
         unsafe { BtcVec::from_inner_vec(vector_new(0, free_vec_item)) }
     }
 
-    fn inner_ref(&self) -> &Vector {
+    fn inner_ref(&self) -> &'static Vector {
         unsafe {
             self.inner.as_ref() // Option<&*mut Vector>
                 .unwrap() // &*mut Vector
