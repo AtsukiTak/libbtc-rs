@@ -97,9 +97,9 @@ extern "C" {
     /* CHAIN PARAMS */
     /* ======================================= */
 
-    static btc_chainparams_main: BtcChainParams;
-    static btc_chainparams_test: BtcChainParams;
-    static btc_chainparams_regtest: BtcChainParams;
+    pub static btc_chainparams_main: BtcChainParams;
+    pub static btc_chainparams_test: BtcChainParams;
+    pub static btc_chainparams_regtest: BtcChainParams;
 
     /* ======================================= */
     /* NODES */

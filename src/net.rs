@@ -5,7 +5,9 @@ use std::str::FromStr;
 use libc::c_char;
 
 use libbtc_sys::btc_false;
-use libbtc_sys::net::{btc_get_peers_from_dns, btc_node_new, btc_node_set_ipport, BtcNode};
+use libbtc_sys::net::{btc_chainparams_main, btc_chainparams_regtest, btc_chainparams_test,
+                      btc_get_peers_from_dns, btc_node_group_new, btc_node_new,
+                      btc_node_set_ipport, BtcNode, BtcNodeGroup};
 
 use vector::BtcVec;
 
@@ -25,6 +27,31 @@ impl Node {
             drop(CString::from_raw(raw_str));
         }
         Node { inner: node }
+    }
+}
+
+pub struct NodeGroup {
+    inner: *mut BtcNodeGroup,
+}
+
+pub enum NetworkType {
+    Main,
+    Test,
+    Regtest,
+}
+
+impl NodeGroup {
+    pub fn new(net: NetworkType) -> NodeGroup {
+        unsafe {
+            let params = match net {
+                NetworkType::Main => btc_chainparams_main,
+                NetworkType::Test => btc_chainparams_test,
+                NetworkType::Regtest => btc_chainparams_regtest,
+            };
+            NodeGroup {
+                inner: btc_node_group_new(&params),
+            }
+        }
     }
 }
 
