@@ -1,12 +1,32 @@
-use std::ffi::CStr;
+use std::ffi::{CStr, CString};
 use std::net::SocketAddr;
 use std::str::FromStr;
 
 use libc::c_char;
 
-use libbtc_sys::net::btc_get_peers_from_dns;
+use libbtc_sys::btc_false;
+use libbtc_sys::net::{btc_get_peers_from_dns, btc_node_new, btc_node_set_ipport, BtcNode};
 
 use vector::BtcVec;
+
+pub struct Node {
+    inner: *mut BtcNode,
+}
+
+impl Node {
+    pub fn new(addr: SocketAddr) -> Node {
+        let node = unsafe { btc_node_new() };
+        let addr_str = CString::new(format!("{}", addr)).unwrap();
+        let raw_str = addr_str.into_raw();
+        if unsafe { btc_node_set_ipport(node, raw_str) } == btc_false {
+            println!("Error");
+        }
+        unsafe {
+            drop(CString::from_raw(raw_str));
+        }
+        Node { inner: node }
+    }
+}
 
 /// Get peer's ip addresses from dns seed.
 pub fn get_peers_from_dns(seed: &str, port: i32, family: i32) -> Vec<SocketAddr> {
