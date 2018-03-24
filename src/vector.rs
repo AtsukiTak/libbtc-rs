@@ -2,14 +2,12 @@ use std::marker::PhantomData;
 
 use libc::c_void;
 
-use libbtc_sys::btc_free;
+use libbtc_sys::{btc_free, btc_true};
 use libbtc_sys::vector::{vector_add, vector_free, vector_new, Vector};
-
-type Should<T> = Option<T>;
 
 /// Abstract type for `libbtc::Vector`.
 pub struct BtcVec<T: 'static> {
-    inner: Should<*mut Vector>, // This ptr's lifetime is 'static.
+    inner: *mut Vector, // This ptr's lifetime is 'static.
     t: PhantomData<T>,
 }
 
@@ -21,13 +19,12 @@ impl<T: 'static> BtcVec<T> {
 
     fn inner_ref(&self) -> &'static Vector {
         unsafe {
-            self.inner.as_ref() // Option<&*mut Vector>
-                .unwrap() // &*mut Vector
-                .as_ref() // Option<&Vector>
-                .unwrap() // &Vector
+            self.inner.as_ref() // Option<&'static Vector>
+                .unwrap() // &'static Vector
         }
     }
 
+    /// Return `true` if it contains nothing else return `false`.
     pub fn is_empty(&self) -> bool {
         self.len() == 0
     }
@@ -66,10 +63,8 @@ impl<T: 'static> BtcVec<T> {
     /// It is unsafe when `item` is not created using `btc_malloc` or `btc_calloc`.
     pub unsafe fn push(&mut self, item: *mut T) {
         self.use_inner_vec(|inner_vec| {
-            unsafe {
-                if vector_add(inner_vec, item as *mut c_void) == 0 {
-                    panic!("Fail to push");
-                }
+            if vector_add(inner_vec, item as *mut c_void) == 0 {
+                panic!("Fail to push");
             }
             (inner_vec, ())
         });
@@ -81,9 +76,8 @@ impl<T: 'static> BtcVec<T> {
     where
         F: FnOnce(*mut Vector) -> (*mut Vector, U),
     {
-        let inner_vec = self.inner.take().unwrap();
-        let (inner_vec, item) = f(inner_vec);
-        self.inner = Some(inner_vec);
+        let (inner_vec, item) = f(self.inner);
+        self.inner = inner_vec;
         item
     }
 
@@ -95,7 +89,7 @@ impl<T: 'static> BtcVec<T> {
     /// - Type `T` is valid type for `Vector`.
     pub unsafe fn from_inner_vec(inner: *mut Vector) -> BtcVec<T> {
         BtcVec {
-            inner: Some(inner),
+            inner: inner,
             t: PhantomData,
         }
     }
@@ -129,7 +123,6 @@ impl<'a, T: 'static> Iterator for BtcVecIter<'a, T> {
 
 impl<T: 'static> Drop for BtcVec<T> {
     fn drop(&mut self) {
-        let inner_vec = self.inner.take().unwrap();
-        unsafe { vector_free(inner_vec, true as u8) };
+        unsafe { vector_free(self.inner, btc_true) };
     }
 }
