@@ -6,3 +6,6 @@ authors = ["AtsukiTak <takatomgoo@gmail.com>"]
 [dependencies]
 libbtc-sys = { path = "libbtc-sys" }
 libc = "0.2"
+
+[workspace]
+members = [ "libbtc-sys" ]
