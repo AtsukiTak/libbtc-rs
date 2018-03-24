@@ -102,8 +102,12 @@ extern "C" {
     /* NODE GROUPS */
     /* ======================================= */
 
+    /* create a new node group */
     pub fn btc_node_group_new(params: *const BtcChainParams) -> *mut BtcNodeGroup;
     pub fn btc_node_group_free(group: *mut BtcNodeGroup);
+
+    /* disconnect all peers */
+    pub fn btc_node_group_shutdown(group: *mut BtcNodeGroup);
 
     /* add a node to a node group */
     pub fn btc_node_group_add_node(group: *mut BtcNodeGroup, node: *mut BtcNode);
