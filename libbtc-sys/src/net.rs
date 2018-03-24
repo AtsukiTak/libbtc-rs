@@ -105,11 +105,18 @@ extern "C" {
     /* NODES */
     /* ======================================= */
 
+    /* create a new node object */
     pub fn btc_node_new() -> *mut BtcNode;
     pub fn btc_node_free(node: *mut BtcNode);
 
     /* set the nodes ip address and port (ipv4 or ipv6)*/
     pub fn btc_node_set_ipport(node: *mut BtcNode, ipport: *const c_char) -> btc_bool;
+
+    /* sends version command to node */
+    pub fn btc_node_send_version(node: *mut BtcNode);
+
+    /* sends arbitrary data to node */
+    pub fn btc_node_send(node: *mut BtcNode, data: *const cstring);
 
     /* ======================================= */
     /* NODE GROUPS */
@@ -125,6 +132,9 @@ extern "C" {
     /* add a node to a node group */
     pub fn btc_node_group_add_node(group: *mut BtcNodeGroup, node: *mut BtcNode);
 
+    /* start node groups event loop */
+    pub fn btc_node_group_event_loop(group: *mut BtcNodeGroup);
+
     /* connect to more nodex */
     pub fn btc_node_group_connect_next_nodes(group: *mut BtcNodeGroup) -> btc_bool;
 
@@ -133,6 +143,10 @@ extern "C" {
         group: *mut BtcNodeGroup,
         state: NodeState,
     ) -> c_int;
+
+    /* ======================================= */
+    /* DNS */
+    /* ======================================= */
 
     pub fn btc_get_peers_from_dns(
         seed: *const c_char,
