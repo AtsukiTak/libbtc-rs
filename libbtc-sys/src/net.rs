@@ -78,6 +78,19 @@ pub struct BtcNode {
     hints: uint32_t, /* can be use for user defined state */
 }
 
+#[repr(C)]
+pub enum NodeState {
+    NODE_CONNECTING = (1 << 0),
+    NODE_CONNECTED = (1 << 1),
+    NODE_ERRORED = (1 << 2),
+    NODE_TIMEOUT = (1 << 3),
+    NODE_HEADERSYNC = (1 << 4),
+    NODE_BLOCKSYNC = (1 << 5),
+    NODE_MISSBEHAVED = (1 << 6),
+    NODE_DISCONNECTED = (1 << 7),
+    NODE_DISCONNECTED_FROM_REMOTE_PEER = (1 << 8),
+}
+
 #[link(name = "btc", kind = "static")]
 extern "C" {
     /* ======================================= */
@@ -111,6 +124,15 @@ extern "C" {
 
     /* add a node to a node group */
     pub fn btc_node_group_add_node(group: *mut BtcNodeGroup, node: *mut BtcNode);
+
+    /* connect to more nodex */
+    pub fn btc_node_group_connect_next_nodes(group: *mut BtcNodeGroup) -> btc_bool;
+
+    /* get the amount of connected nodes */
+    pub fn btc_node_group_amount_of_connected_nodes(
+        group: *mut BtcNodeGroup,
+        state: NodeState,
+    ) -> c_int;
 
     pub fn btc_get_peers_from_dns(
         seed: *const c_char,
