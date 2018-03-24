@@ -76,11 +76,22 @@ pub struct BtcNode {
 
 #[link(name = "btc", kind = "static")]
 extern "C" {
+    /* ======================================= */
+    /* NODES                                   */
+    /* ======================================= */
+
     pub fn btc_node_new() -> *mut BtcNode;
     pub fn btc_node_free(group: *mut BtcNode);
 
     /* set the nodes ip address and port (ipv4 or ipv6)*/
     pub fn btc_node_set_ipport(node: *mut BtcNode, ipport: *const c_char) -> btc_bool;
+
+    /* ======================================= */
+    /* NODE GROUPS                             */
+    /* ======================================= */
+
+    pub fn btc_node_group_new(*const BtcChainParams) -> *mut BtcNodeGroup;
+    pub fn btc_node_group_free(*mut BtcNodeGroup);
 
     pub fn btc_get_peers_from_dns(
         seed: *const c_char,
