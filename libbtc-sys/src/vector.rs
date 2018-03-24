@@ -29,6 +29,15 @@ mod tests {
     }
 
     #[test]
+    fn new_and_free_vector_should_not_panic() {
+        unsafe {
+            let vec = vector_new(10, nothing);
+            assert!(!vec.is_null());
+            vector_free(vec, 0);
+        }
+    }
+
+    #[test]
     fn vector() {
         unsafe {
             let vec = vector_new(10, nothing);

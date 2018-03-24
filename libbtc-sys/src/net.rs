@@ -98,6 +98,7 @@ mod tests {
     fn btc_node_new_and_free_should_not_panic() {
         unsafe {
             let node = btc_node_new();
+            assert!(!node.is_null());
             btc_node_free(node);
         }
     }
