@@ -6,8 +6,8 @@ use libc::c_char;
 
 use libbtc_sys::btc_false;
 use libbtc_sys::net::{btc_chainparams_main, btc_chainparams_regtest, btc_chainparams_test,
-                      btc_get_peers_from_dns, btc_node_group_new, btc_node_new,
-                      btc_node_set_ipport, BtcNode, BtcNodeGroup};
+                      btc_get_peers_from_dns, btc_node_group_add_node, btc_node_group_new,
+                      btc_node_new, btc_node_set_ipport, BtcNode, BtcNodeGroup};
 
 use vector::BtcVec;
 
@@ -32,6 +32,7 @@ impl Node {
 
 pub struct NodeGroup {
     inner: *mut BtcNodeGroup,
+    nodes_: Vec<Node>, // Prevent Node to be dropped.
 }
 
 pub enum NetworkType {
@@ -48,10 +49,19 @@ impl NodeGroup {
                 NetworkType::Test => btc_chainparams_test,
                 NetworkType::Regtest => btc_chainparams_regtest,
             };
+
             NodeGroup {
                 inner: btc_node_group_new(&params),
+                nodes_: Vec::new(),
             }
         }
+    }
+
+    pub fn add_node(&mut self, node: Node) {
+        unsafe {
+            btc_node_group_add_node(self.inner, node.inner);
+        }
+        self.nodes_.push(node);
     }
 }
 
