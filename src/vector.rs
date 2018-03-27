@@ -1,8 +1,9 @@
 use std::marker::PhantomData;
+use std::mem::size_of;
 
 use libc::c_void;
 
-use libbtc_sys::{btc_free, btc_true};
+use libbtc_sys::{btc_calloc, btc_free, btc_true};
 use libbtc_sys::vector::{vector_add, vector_free, vector_new, Vector};
 
 /// Abstract type for `libbtc::Vector`.
@@ -61,13 +62,25 @@ impl<T: 'static> BtcVec<T> {
     ///
     /// # Unsafe
     /// It is unsafe when `item` is not created using `btc_malloc` or `btc_calloc`.
-    pub unsafe fn push(&mut self, item: *mut T) {
+    pub unsafe fn push_raw_item(&mut self, item: *mut T) {
         self.use_inner_vec(|inner_vec| {
             if vector_add(inner_vec, item as *mut c_void) == 0 {
                 panic!("Fail to push");
             }
             (inner_vec, ())
         });
+    }
+
+    pub fn push(&mut self, item: T) {
+        unsafe {
+            let ptr = btc_calloc(1, size_of::<T>()) as *mut T;
+            {
+                // libbtc::btc_calloc never returns NULL.
+                let mut_ptr = ptr.as_mut().unwrap();
+                *mut_ptr = item;
+            }
+            self.push_raw_item(ptr)
+        }
     }
 
     /// Useful function when you want to access raw `libbtc::Vector`.
