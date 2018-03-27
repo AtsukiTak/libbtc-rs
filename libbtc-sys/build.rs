@@ -6,6 +6,8 @@ fn main() {
 
     let lib = pkg_config::Config::new()
         .atleast_version("2.0.0")
+        .statik(true)
+        .cargo_metadata(false)
         .probe("libevent")
         .unwrap();
     for inc_path in lib.include_paths.iter() {
@@ -18,5 +20,6 @@ fn main() {
         .file("libbtc/src/memory.c")
         .file("libbtc/src/chainparams.c")
         .file("libbtc/src/cstr.c")
+        .static_flag(true)
         .compile("libbtc.a")
 }
