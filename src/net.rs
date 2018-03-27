@@ -68,10 +68,10 @@ impl NodeGroup {
 /// Get peer's ip addresses from dns seed.
 pub fn get_peers_from_dns(seed: &str, port: i32, family: i32) -> Vec<SocketAddr> {
     let mut vec: BtcVec<c_char> = BtcVec::new();
+    let seed_cstr = CString::new(seed).expect("Invalid seed string");
     vec.use_inner_vec(move |inner_vec| {
-        let seed_bytes: *const u8 = seed.as_ptr();
         unsafe {
-            let _cnt = btc_get_peers_from_dns(seed_bytes as _, inner_vec, port, family);
+            let _cnt = btc_get_peers_from_dns(seed_cstr.into_raw(), inner_vec, port, family);
         }
         (inner_vec, ())
     });
@@ -96,12 +96,6 @@ mod tests {
         let port = 8333;
         let family = ::libc::AF_INET;
         let peers = get_peers_from_dns(seed, port, family);
-
-        // I'm not sure but if I comment below single line out,
-        // peers.len() returns 0.
-        // It maybe compiler optimization problem but I have no idea
-        // what should I do.
-        println!("{:?}", peers);
 
         assert!(peers.len() != 0);
     }
